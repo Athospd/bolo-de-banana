@@ -5,30 +5,38 @@ library(dplyr)
 
 # Banco de dados para construir o UI do app
 bd_ui_tabs <- reactive({
-  read.csv2("www/csv/bd_ui_tabs.csv", stringsAsFactors = FALSE)
+  a<-read.csv2("www/csv/bd_ui_tabs.csv", stringsAsFactors = FALSE)
 })
   
 # Constrói lista de itens do sidebarMenu
 menuItems <- function(bd_ui_tabs) {
   bd_ui_tabs %>%
-    plyr::dlply(.(tab_id), function(args) {
-      args %$% c(text = ifelse(text %>% is.na, "", text)
-               ,icon = if (icon %>% is.na){NULL} else {shiny::icon(icon)}
-               ,badgeLabel = ifelse(badgeLabel %>% is.na, NULL, badgeLabel)
-               ,badgeColor = ifelse(badgeColor %>% is.na, "green", badgeColor)
-               ,tabName = ifelse(tabName %>% is.na, NULL, tabName)
-               ,href = ifelse(href %>% is.na, NULL, href)
-               ,newtab = ifelse(newtab %>% is.na, NULL, newtab)
-               ,selected = ifelse(selected %>% is.na, NULL, selected)) %>% print
-      args %$%
-        menuItem(text = ifelse(text %>% is.na, "", text)
-                ,icon = if (icon %>% is.na){NULL} else {shiny::icon(icon)}
-                ,badgeLabel = ifelse(badgeLabel %>% is.na, NULL, badgeLabel)
-                ,badgeColor = ifelse(badgeColor %>% is.na, "green", badgeColor)
-                ,tabName = ifelse(tabName %>% is.na, NULL, tabName)
-                ,href = ifelse(href %>% is.na, NULL, href)
-                ,newtab = ifelse(newtab %>% is.na, NULL, newtab)
-                ,selected = ifelse(selected %>% is.na, NULL, selected))
+    plyr::dlply(.(tabName), function(args) {
+      args %$% {
+        if(args$tab_parent_id == 0) {
+          function(...) {
+            # se ... tiver um elemento, então
+            menuItem(text = if(text %>% is.na) {""} else {text}
+                    ,icon = if (icon %>% is.na) {NULL} else {shiny::icon(icon)}
+                    ,badgeLabel = if(badgeLabel %>% is.na) {NULL} else {badgeLabel}
+                    ,badgeColor = if(badgeColor %>% is.na) {"green"} else {badgeColor}
+                    ,tabName = if(tabName %>% is.na) {NULL} else {tabName}
+                    ,href = if(href %>% is.na) {NULL} else {href}
+                    ,newtab = if(newtab %>% is.na) {TRUE} else {newtab}
+                    ,selected = if(selected %>% is.na) {NULL} else {selected},
+                    ...)
+            # se ... tiver uma lista de elementos, então
+            # loop menuItem...
+          }
+        } else {
+          menuSubItem(text = if(text %>% is.na) {""} else {text}
+                   ,icon = if (icon %>% is.na) {NULL} else {shiny::icon(icon)}
+                   ,tabName = if(tabName %>% is.na) {NULL} else {tabName}
+                   ,href = if(href %>% is.na) {NULL} else {href}
+                   ,newtab = if(newtab %>% is.na) {TRUE} else {newtab}
+                   ,selected = if(selected %>% is.na) {NULL} else {selected})
+        }
+      }
     }) 
 }
 
