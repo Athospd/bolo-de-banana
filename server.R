@@ -8,11 +8,18 @@ library(shiny)
 library(shinydashboard)
 
 shinyServer(function(input, output) {
-  set.seed(122)
-  histdata <- rnorm(500)
   
-  output$plot1 <- renderPlot({
-    data <- histdata[seq_len(input$slider)]
-    hist(data)
+  output$tab <- renderText({input$tabs})
+  
+  output$menu <- renderMenu({
+    sidebarMenu(.list = menuItems)
+  })
+  
+  output$content_header <- renderUI({
+    active_tab_info <- bd_ui_tabs() %>% filter(tabName %in% input$tabs)
+    content_header(title = active_tab_info$text
+                   ,subtitle = active_tab_info$desc
+                   ,tabName = active_tab_info$tabName
+                   ,icon = active_tab_info$icon)
   })
 }) 
